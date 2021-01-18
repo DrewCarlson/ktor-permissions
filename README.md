@@ -1,7 +1,7 @@
 Ktor Permissions
 ===
 
-![Bintray](https://img.shields.io/bintray/v/drewcarlson/ktor/Ktor-Features?color=blue)
+![Bintray](https://img.shields.io/bintray/v/drewcarlson/Ktor/Ktor-Features?color=blue)
 ![](https://img.shields.io/maven-metadata/v?label=artifactory&logoColor=lightgrey&metadataUrl=https%3A%2F%2Foss.jfrog.org%2Fartifactory%2Foss-snapshot-local%2Fdrewcarlson%2Fktor%2Fktor-permissions%2Fmaven-metadata.xml&color=lightgrey)
 ![](https://github.com/DrewCarlson/ktor-permissions/workflows/Build/badge.svg)
 
