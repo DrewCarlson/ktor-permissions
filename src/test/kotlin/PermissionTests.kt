@@ -108,6 +108,15 @@ class PermissionTests {
             assertEquals(Forbidden, statusFor("/all/AB", tokenC))
             assertEquals(Forbidden, statusFor("/all/ABC", tokenC))
             assertEquals(Forbidden, statusFor("/all/ABCZ", tokenC))
+
+            val tokenAB = tokenWith(A, B)
+
+            assertEquals(OK, statusFor("/all/A", tokenAB))
+            assertEquals(OK, statusFor("/all/B", tokenAB))
+            assertEquals(OK, statusFor("/all/AB", tokenAB))
+            assertEquals(Forbidden, statusFor("/all/C", tokenAB))
+            assertEquals(Forbidden, statusFor("/all/ABC", tokenAB))
+            assertEquals(Forbidden, statusFor("/all/ABCZ", tokenAB))
         }
     }
 
@@ -140,6 +149,15 @@ class PermissionTests {
             assertEquals(Forbidden, statusFor("/any/AB", tokenC))
             assertEquals(Forbidden, statusFor("/any/B", tokenC))
             assertEquals(Forbidden, statusFor("/any/Z", tokenC))
+
+            val tokenBC = tokenWith(B, C)
+
+            assertEquals(OK, statusFor("/any/C", tokenBC))
+            assertEquals(OK, statusFor("/any/ABC", tokenBC))
+            assertEquals(Forbidden, statusFor("/any/A", tokenBC))
+            assertEquals(OK, statusFor("/any/AB", tokenBC))
+            assertEquals(OK, statusFor("/any/B", tokenBC))
+            assertEquals(Forbidden, statusFor("/any/Z", tokenC))
         }
     }
 
@@ -170,6 +188,14 @@ class PermissionTests {
             assertEquals(OK, statusFor("/without/A", tokenC))
             assertEquals(OK, statusFor("/without/AB", tokenC))
             assertEquals(OK, statusFor("/without/B", tokenC))
+
+            val tokenAB = tokenWith(A,B)
+
+            assertEquals(OK, statusFor("/without/C", tokenAB))
+            assertEquals(Forbidden, statusFor("/without/ABC", tokenAB))
+            assertEquals(Forbidden, statusFor("/without/A", tokenAB))
+            assertEquals(Forbidden, statusFor("/without/AB", tokenAB))
+            assertEquals(Forbidden, statusFor("/without/B", tokenAB))
         }
     }
 }
