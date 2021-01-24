@@ -27,14 +27,6 @@ data class UserSession(
 ) : Principal
 
 fun Application.module() {
-    install(Authentication) {
-        session<UserSession> { /* ... */ }
-    }
-
-    install(Sessions) {
-        header<UserSession>("USER_SESSION") { /* ... */ }
-    }
-
     install(PermissionAuthorization) {
         // Given the Principal, extract the user's permissions
         extract { (it as UserSession).permissions }
