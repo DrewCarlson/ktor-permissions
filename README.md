@@ -65,11 +65,11 @@ fun Application.module() {
 
 Artifacts are available on [Bintray](https://bintray.com/drewcarlson/Ktor).
 
-```groovy
+```kotlin
 repositories {
     jcenter()
     // Or snapshots
-    maven { setUrl("http://oss.jfrog.org/artifactory/oss-snapshot-local") }
+    maven(url = "http://oss.jfrog.org/artifactory/oss-snapshot-local") }
 }
 
 dependencies {
