@@ -1,11 +1,10 @@
 Ktor Permissions
 ===
 
-![Bintray](https://img.shields.io/bintray/v/drewcarlson/Ktor/Ktor-Features?color=blue)
-![](https://img.shields.io/maven-metadata/v?label=artifactory&logoColor=lightgrey&metadataUrl=https%3A%2F%2Foss.jfrog.org%2Fartifactory%2Foss-snapshot-local%2Fdrewcarlson%2Fktor%2Fktor-permissions%2Fmaven-metadata.xml&color=lightgrey)
+![Maven Central](https://img.shields.io/maven-central/v/org.drewcarlson/ktor-permissions?label=maven&color=blue)
 ![](https://github.com/DrewCarlson/ktor-permissions/workflows/Build/badge.svg)
 
-Simple route permissions for Ktor using the Authentication feature.
+Simple route permissions for Ktor.
 
 
 ### Usage
@@ -63,16 +62,17 @@ fun Application.module() {
 
 ### Download
 
-Artifacts are available on [Bintray](https://bintray.com/drewcarlson/Ktor).
+![Maven Central](https://img.shields.io/maven-central/v/org.drewcarlson/ktor-permissions?label=maven&color=blue)
+![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/org.drewcarlson/ktor-permissions?server=https%3A%2F%2Fs01.oss.sonatype.org)
 
 ```kotlin
 repositories {
-    jcenter()
+    mavenCentral()
     // Or snapshots
-    maven(url = "http://oss.jfrog.org/artifactory/oss-snapshot-local") }
+  maven(url = "https://s01.oss.sonatype.org/content/repositories/snapshots/")
 }
 
 dependencies {
-    implementation("drewcarlson.ktor:ktor-permissions:$KTOR_PERMISSIONS_VERSION")
+    implementation("org.drewcarlson:ktor-permissions:$KTOR_PERMISSIONS_VERSION")
 }
 ```
