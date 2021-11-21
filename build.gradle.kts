@@ -8,7 +8,6 @@ apply(from = "./gradle/publishing.gradle.kts")
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 dependencies {
