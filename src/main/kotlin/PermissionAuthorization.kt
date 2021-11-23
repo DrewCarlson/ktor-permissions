@@ -1,11 +1,10 @@
-package drewcarlson.ktor.permissions
+package org.drewcarlson.ktor.permissions
 
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.http.HttpStatusCode.Companion.Forbidden
 import io.ktor.request.*
 import io.ktor.response.*
-import io.ktor.routing.*
 import io.ktor.util.*
 import io.ktor.util.pipeline.*
 

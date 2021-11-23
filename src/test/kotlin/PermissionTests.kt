@@ -1,9 +1,9 @@
-package drewcarlson.ktor.permissions
+package org.drewcarlson.ktor.permissions
 
-import drewcarlson.ktor.permissions.Permission.A
-import drewcarlson.ktor.permissions.Permission.B
-import drewcarlson.ktor.permissions.Permission.C
-import drewcarlson.ktor.permissions.Permission.Z
+import org.drewcarlson.ktor.permissions.Permission.A
+import org.drewcarlson.ktor.permissions.Permission.B
+import org.drewcarlson.ktor.permissions.Permission.C
+import org.drewcarlson.ktor.permissions.Permission.Z
 import io.ktor.auth.Principal
 import io.ktor.http.HttpStatusCode.Companion.Forbidden
 import io.ktor.http.HttpStatusCode.Companion.OK

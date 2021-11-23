@@ -1,4 +1,4 @@
-package drewcarlson.ktor.permissions
+package org.drewcarlson.ktor.permissions
 
 import io.ktor.application.call
 import io.ktor.application.install
