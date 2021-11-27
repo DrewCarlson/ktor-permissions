@@ -28,11 +28,15 @@ task<Jar>("javadocJar") {
 }
 
 configure<PublishingExtension> {
-    components.findByName("java")?.let { javaComponent ->
-        publications {
-            register<MavenPublication>("mavenJava") {
-                from(javaComponent)
-            }
+    components.findByName("java")?.also { javaComponent ->
+        task<Jar>("sourcesJar") {
+            archiveClassifier.set("sources")
+            val sourceSets = project.extensions.getByName<SourceSetContainer>("sourceSets")
+            from(sourceSets["main"].allSource)
+        }
+        publications.create<MavenPublication>("mavenJava") {
+            from(javaComponent)
+            artifact(tasks["sourcesJar"])
         }
     }
     components.all {
