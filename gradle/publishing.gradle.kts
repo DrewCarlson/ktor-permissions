@@ -39,28 +39,26 @@ configure<PublishingExtension> {
             artifact(tasks["sourcesJar"])
         }
     }
-    components.all {
-        publications.withType<MavenPublication> {
-            artifact(tasks.named("javadocJar"))
-            with(pom) {
-                name.set(rootProject.name)
-                url.set(pomProjectUrl)
-                description.set(pomProjectDescription)
-                scm {
-                    url.set(pomScmUrl)
+    publications.withType<MavenPublication> {
+        artifact(tasks.named("javadocJar"))
+        with(pom) {
+            name.set(rootProject.name)
+            url.set(pomProjectUrl)
+            description.set(pomProjectDescription)
+            scm {
+                url.set(pomScmUrl)
+            }
+            developers {
+                developer {
+                    id.set(pomDeveloperId)
+                    name.set(pomDeveloperName)
                 }
-                developers {
-                    developer {
-                        id.set(pomDeveloperId)
-                        name.set(pomDeveloperName)
-                    }
-                }
-                licenses {
-                    license {
-                        name.set(pomLicenseName)
-                        url.set(pomLicenseUrl)
-                        distribution.set(pomLicenseDistribution)
-                    }
+            }
+            licenses {
+                license {
+                    name.set(pomLicenseName)
+                    url.set(pomLicenseUrl)
+                    distribution.set(pomLicenseDistribution)
                 }
             }
         }
