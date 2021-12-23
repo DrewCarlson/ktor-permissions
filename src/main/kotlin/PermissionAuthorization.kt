@@ -1,10 +1,10 @@
 package org.drewcarlson.ktor.permissions
 
-import io.ktor.application.*
-import io.ktor.auth.*
 import io.ktor.http.HttpStatusCode.Companion.Forbidden
-import io.ktor.request.*
-import io.ktor.response.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
 import io.ktor.util.*
 import io.ktor.util.pipeline.*
 
@@ -49,7 +49,7 @@ class PermissionAuthorization internal constructor(
         all: Set<P>? = null,
         none: Set<P>? = null
     ) {
-        pipeline.insertPhaseAfter(ApplicationCallPipeline.Features, Authentication.ChallengePhase)
+        pipeline.insertPhaseAfter(ApplicationCallPipeline.Plugins, Authentication.ChallengePhase)
         pipeline.insertPhaseAfter(Authentication.ChallengePhase, AuthorizationPhase)
 
         pipeline.intercept(AuthorizationPhase) {
@@ -90,8 +90,8 @@ class PermissionAuthorization internal constructor(
     }
 
 
-    companion object Feature :
-        ApplicationFeature<ApplicationCallPipeline, Configuration, PermissionAuthorization> {
+    companion object Plugin :
+        ApplicationPlugin<ApplicationCallPipeline, Configuration, PermissionAuthorization> {
         override val key = AttributeKey<PermissionAuthorization>("PermissionAuthorization")
 
         val AuthorizationPhase = PipelinePhase("PermissionAuthorization")

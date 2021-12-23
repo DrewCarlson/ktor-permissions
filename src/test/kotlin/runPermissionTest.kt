@@ -1,52 +1,57 @@
 package org.drewcarlson.ktor.permissions
 
-import io.ktor.application.call
-import io.ktor.application.install
-import io.ktor.auth.Authentication
-import io.ktor.auth.authenticate
-import io.ktor.auth.session
-import io.ktor.features.ContentNegotiation
-import io.ktor.http.ContentType
-import io.ktor.http.HttpMethod
-import io.ktor.http.HttpStatusCode
-import io.ktor.request.receiveOrNull
-import io.ktor.response.respond
-import io.ktor.routing.*
-import io.ktor.serialization.DefaultJson
-import io.ktor.serialization.json
+import io.ktor.client.plugins.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.plugins.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import io.ktor.server.sessions.*
 import io.ktor.server.testing.*
-import io.ktor.sessions.SessionStorageMemory
-import io.ktor.sessions.Sessions
-import io.ktor.sessions.getOrSet
-import io.ktor.sessions.header
-import io.ktor.sessions.sessions
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.util.Base64
 import kotlin.random.Random
 
 private const val TOKEN = "TOKEN"
 
-fun TestApplicationEngine.tokenWith(vararg permissions: Permission): String {
-    return handleRequest(HttpMethod.Post, "/token") {
-        addHeader("Content-Type", ContentType.Application.Json.toString())
-        setBody(DefaultJson.encodeToString(permissions))
-    }.response.headers[TOKEN]!!
+suspend fun ApplicationTestBuilder.tokenWith(vararg permissions: Permission): String {
+    return try {
+        client.request {
+            method = HttpMethod.Post
+            url.takeFrom("/token")
+            contentType(ContentType.Application.Json)
+            setBody(Json.encodeToString(permissions))
+        }
+    } catch (e: ClientRequestException) {
+        e.response
+    }.headers[TOKEN]!!
 }
 
-fun TestApplicationEngine.statusFor(
+suspend fun ApplicationTestBuilder.statusFor(
     uri: String,
     token: String,
 ): HttpStatusCode {
-    return handleRequest(HttpMethod.Get, uri) {
-        addHeader(TOKEN, token)
-    }.response.status()!!
+    return try {
+        client.request {
+            method = HttpMethod.Get
+            url.takeFrom(uri)
+            header(TOKEN, token)
+        }
+    } catch (e: ClientRequestException) {
+        e.response
+    }.status
 }
 
 fun runPermissionTest(
     setGlobal: Boolean,
-    test: TestApplicationEngine.() -> Unit,
+    test: suspend ApplicationTestBuilder.() -> Unit,
 ) {
-    withTestApplication({
+    testApplication {
         install(Authentication) {
             session<UserSession> {
                 challenge { context.respond(HttpStatusCode.Unauthorized) }
@@ -127,5 +132,7 @@ fun runPermissionTest(
                 }
             }
         }
-    }, test = test)
+
+        test()
+    }
 }

@@ -4,9 +4,9 @@ import org.drewcarlson.ktor.permissions.Permission.A
 import org.drewcarlson.ktor.permissions.Permission.B
 import org.drewcarlson.ktor.permissions.Permission.C
 import org.drewcarlson.ktor.permissions.Permission.Z
-import io.ktor.auth.Principal
 import io.ktor.http.HttpStatusCode.Companion.Forbidden
 import io.ktor.http.HttpStatusCode.Companion.OK
+import io.ktor.server.auth.*
 import kotlinx.serialization.Serializable
 import kotlin.test.Test
 import kotlin.test.assertEquals
