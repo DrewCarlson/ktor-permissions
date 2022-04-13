@@ -55,8 +55,7 @@ private fun <P : Any> Route.authorizedRoute(
         none?.let { "noneOf (${none.joinToString(" ")})" }
     ).joinToString(",")
     return createChild(AuthorizedRouteSelector(description)).also { route ->
-        application
-            .plugin(PermissionAuthorization)
+        application.plugin(PermissionAuthorization)
             .interceptPipeline(route, any, all, none)
         route.build()
     }

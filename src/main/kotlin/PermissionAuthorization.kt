@@ -6,13 +6,13 @@ import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.util.*
-import io.ktor.util.pipeline.*
 
 private const val PRINCIPAL_OBJECT_MISSING = "Principal missing, is the route wrapped in `authenticate {  }`?"
 private const val PRINCIPAL_PERMISSIONS_MISSING_ALL = "Principal '%s' is missing required permission(s) %s"
 private const val PRINCIPAL_PERMISSIONS_MISSING_ANY = "Principal '%s' is missing all possible permission(s) %s"
 private const val PRINCIPAL_PERMISSIONS_MATCHED_EXCLUDE = "Principal '%s' has excluded permission(s) %s"
-private const val EXTRACT_PERMISSIONS_NOT_DEFINED = "Principal permission extractor must be defined, ex: `extract { (it as Session).permissions }`."
+private const val EXTRACT_PERMISSIONS_NOT_DEFINED =
+    "Principal permission extractor must be defined, ex: `extract { (it as Session).permissions }`."
 
 class PermissionAuthorization internal constructor(
     private val configuration: Configuration
@@ -49,17 +49,12 @@ class PermissionAuthorization internal constructor(
         all: Set<P>? = null,
         none: Set<P>? = null
     ) {
-        pipeline.insertPhaseAfter(ApplicationCallPipeline.Plugins, Authentication.ChallengePhase)
-        pipeline.insertPhaseAfter(Authentication.ChallengePhase, AuthorizationPhase)
-
-        pipeline.intercept(AuthorizationPhase) {
-            val principal = checkNotNull(call.authentication.principal()) {
-                PRINCIPAL_OBJECT_MISSING
-            }
+        AuthenticationChecked.install(pipeline) { call ->
+            val principal = checkNotNull(call.authentication.principal()) { PRINCIPAL_OBJECT_MISSING }
             val activePermissions = configuration.extractPermissions(principal)
             configuration.globalPermission?.let {
                 if (activePermissions.contains(it)) {
-                    return@intercept
+                    return@install
                 }
             }
             val denyReasons = mutableListOf<String>()
@@ -84,18 +79,14 @@ class PermissionAuthorization internal constructor(
                 val message = denyReasons.joinToString(". ")
                 call.application.log.warn("Authorization failed for ${call.request.path()}. $message")
                 call.respond(Forbidden)
-                finish()
             }
         }
     }
 
 
     companion object Plugin :
-        ApplicationPlugin<ApplicationCallPipeline, Configuration, PermissionAuthorization> {
+        BaseApplicationPlugin<ApplicationCallPipeline, Configuration, PermissionAuthorization> {
         override val key = AttributeKey<PermissionAuthorization>("PermissionAuthorization")
-
-        val AuthorizationPhase = PipelinePhase("PermissionAuthorization")
-
         override fun install(
             pipeline: ApplicationCallPipeline,
             configure: Configuration.() -> Unit

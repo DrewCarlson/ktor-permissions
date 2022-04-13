@@ -6,7 +6,7 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.plugins.*
+import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -19,7 +19,7 @@ import kotlin.random.Random
 
 private const val TOKEN = "TOKEN"
 
-suspend fun ApplicationTestBuilder.tokenWith(vararg permissions: Permission): String {
+suspend fun ClientProvider.tokenWith(vararg permissions: Permission): String {
     return try {
         client.request {
             method = HttpMethod.Post
@@ -32,7 +32,7 @@ suspend fun ApplicationTestBuilder.tokenWith(vararg permissions: Permission): St
     }.headers[TOKEN]!!
 }
 
-suspend fun ApplicationTestBuilder.statusFor(
+suspend fun ClientProvider.statusFor(
     uri: String,
     token: String,
 ): HttpStatusCode {
@@ -54,7 +54,7 @@ fun runPermissionTest(
     testApplication {
         install(Authentication) {
             session<UserSession> {
-                challenge { context.respond(HttpStatusCode.Unauthorized) }
+                challenge { call.respond(HttpStatusCode.Unauthorized) }
                 validate { it }
             }
         }
