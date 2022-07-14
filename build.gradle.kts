@@ -1,7 +1,10 @@
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    kotlin("jvm") version KOTLIN_VERSION
-    kotlin("plugin.serialization") version KOTLIN_VERSION
-    id("org.jetbrains.dokka") version DOKKA_VERSION
+    alias(libs.plugins.jvm)
+    alias(libs.plugins.serialization)
+    alias(libs.plugins.spotless)
+    alias(libs.plugins.kover)
+    alias(libs.plugins.dokka)
 }
 
 apply(from = "./gradle/publishing.gradle.kts")
@@ -11,20 +14,18 @@ repositories {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    sourceCompatibility = "11"
-    targetCompatibility = "11"
     kotlinOptions.jvmTarget = "11"
 }
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("io.ktor:ktor-server-core:$KTOR_VERSION")
-    implementation("io.ktor:ktor-server-sessions:$KTOR_VERSION")
-    implementation("io.ktor:ktor-server-auth:$KTOR_VERSION")
+    implementation(libs.serialization.json)
+    implementation(libs.ktor.server.core)
+    implementation(libs.ktor.server.sessions)
+    implementation(libs.ktor.server.auth)
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
-    testImplementation("io.ktor:ktor-server-tests:$KTOR_VERSION")
-    testImplementation("io.ktor:ktor-serialization-kotlinx-json:$KTOR_VERSION")
-    testImplementation("io.ktor:ktor-server-content-negotiation:$KTOR_VERSION")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$SERIALIZATION_VERSION")
+    testImplementation(libs.ktor.server.tests)
+    testImplementation(libs.ktor.server.contentNegotiation)
+    testImplementation(libs.ktor.serialization)
 }
