@@ -5,9 +5,15 @@ plugins {
     alias(libs.plugins.spotless)
     alias(libs.plugins.kover)
     alias(libs.plugins.dokka)
+    alias(libs.plugins.binaryCompat)
+    alias(libs.plugins.mavenPublish)
 }
 
-apply(from = "./gradle/publishing.gradle.kts")
+System.getenv("GITHUB_REF")?.let { ref ->
+    if (ref.startsWith("refs/tags/v")) {
+        version = ref.substringAfterLast("refs/tags/v")
+    }
+}
 
 repositories {
     mavenCentral()
