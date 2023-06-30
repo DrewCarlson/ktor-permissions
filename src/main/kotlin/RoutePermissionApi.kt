@@ -2,6 +2,7 @@ package org.drewcarlson.ktor.permissions
 
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
+import kotlin.reflect.KClass
 
 /**
  * Routes defined in [build] will only be invoked when the
@@ -42,6 +43,20 @@ fun <P : Any> Route.withAnyPermission(vararg permissions: P, build: Route.() -> 
  */
 fun <P : Any> Route.withoutPermissions(vararg permissions: P, build: Route.() -> Unit) =
     authorizedRoute(none = permissions.toSet(), build = build)
+
+fun <P : Any> Route.withPermission(
+    builder: WithPermissionGroup<P>.() -> Unit,
+    buildRoute: Route.() -> Unit
+): Route {
+    val permissions = WithPermissionGroup<P>().apply(builder).permissions.toMap()
+    val description = "anyOf (${permissions.mapNotNull { (_, v) -> v.first?.toString() }.joinToString()})"
+    return createChild(AuthorizedRouteSelector(description)).also { route ->
+        @Suppress("UNCHECKED_CAST")
+        application.plugin(PermissionAuthorization)
+            .interceptPipeline(route, permissions as Map<KClass<P>, Triple<P?, Verifier<P>, PermissionSelect<P>?>>)
+        route.buildRoute()
+    }
+}
 
 private fun <P : Any> Route.authorizedRoute(
     any: Set<P>? = null,

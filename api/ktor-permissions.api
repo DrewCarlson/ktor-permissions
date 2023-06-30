@@ -4,8 +4,15 @@ public final class org/drewcarlson/ktor/permissions/AuthorizedRouteSelector : io
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface class org/drewcarlson/ktor/permissions/DynamicPermissionBuilder {
+	public abstract fun select (Lkotlin/jvm/functions/Function2;)V
+	public abstract fun stub (Ljava/lang/Object;)V
+	public abstract fun verify (Lkotlin/jvm/functions/Function1;)V
+}
+
 public final class org/drewcarlson/ktor/permissions/PermissionAuthorization {
 	public static final field Plugin Lorg/drewcarlson/ktor/permissions/PermissionAuthorization$Plugin;
+	public final fun interceptPipeline (Lio/ktor/server/application/ApplicationCallPipeline;Ljava/util/Map;)V
 	public final fun interceptPipeline (Lio/ktor/server/application/ApplicationCallPipeline;Ljava/util/Set;Ljava/util/Set;Ljava/util/Set;)V
 	public static synthetic fun interceptPipeline$default (Lorg/drewcarlson/ktor/permissions/PermissionAuthorization;Lio/ktor/server/application/ApplicationCallPipeline;Ljava/util/Set;Ljava/util/Set;Ljava/util/Set;ILjava/lang/Object;)V
 }
@@ -25,6 +32,12 @@ public final class org/drewcarlson/ktor/permissions/RoutePermissionApiKt {
 	public static final fun withAllPermissions (Lio/ktor/server/routing/Route;[Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)Lio/ktor/server/routing/Route;
 	public static final fun withAnyPermission (Lio/ktor/server/routing/Route;[Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)Lio/ktor/server/routing/Route;
 	public static final fun withPermission (Lio/ktor/server/routing/Route;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)Lio/ktor/server/routing/Route;
+	public static final fun withPermission (Lio/ktor/server/routing/Route;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)Lio/ktor/server/routing/Route;
 	public static final fun withoutPermissions (Lio/ktor/server/routing/Route;[Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)Lio/ktor/server/routing/Route;
+}
+
+public final class org/drewcarlson/ktor/permissions/WithPermissionGroup {
+	public fun <init> ()V
+	public final fun add (Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;)V
 }
 
