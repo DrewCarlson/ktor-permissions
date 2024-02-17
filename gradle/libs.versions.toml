@@ -4,7 +4,7 @@ dokka = "1.9.10"
 coroutines = "1.7.3"
 serialization = "1.6.2"
 ktorio = "2.3.5"
-kover = "0.7.4"
+kover = "0.7.6"
 binary_compat = "0.14.0"
 
 okhttp = "5.0.0-alpha.12"
