@@ -1,6 +1,6 @@
 public final class org/drewcarlson/ktor/permissions/AuthorizedRouteSelector : io/ktor/server/routing/RouteSelector {
 	public fun <init> (Ljava/lang/String;)V
-	public fun evaluate (Lio/ktor/server/routing/RoutingResolveContext;I)Lio/ktor/server/routing/RouteSelectorEvaluation;
+	public fun evaluate (Lio/ktor/server/routing/RoutingResolveContext;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -12,20 +12,17 @@ public abstract interface class org/drewcarlson/ktor/permissions/DynamicPermissi
 
 public final class org/drewcarlson/ktor/permissions/PermissionAuthorization {
 	public static final field Plugin Lorg/drewcarlson/ktor/permissions/PermissionAuthorization$Plugin;
-	public final fun interceptPipeline (Lio/ktor/server/application/ApplicationCallPipeline;Ljava/util/Map;)V
-	public final fun interceptPipeline (Lio/ktor/server/application/ApplicationCallPipeline;Ljava/util/Set;Ljava/util/Set;Ljava/util/Set;)V
-	public static synthetic fun interceptPipeline$default (Lorg/drewcarlson/ktor/permissions/PermissionAuthorization;Lio/ktor/server/application/ApplicationCallPipeline;Ljava/util/Set;Ljava/util/Set;Ljava/util/Set;ILjava/lang/Object;)V
-}
-
-public final class org/drewcarlson/ktor/permissions/PermissionAuthorization$Configuration {
-	public final fun extract (Lkotlin/jvm/functions/Function1;)V
-	public final fun global (Ljava/lang/Object;)V
 }
 
 public final class org/drewcarlson/ktor/permissions/PermissionAuthorization$Plugin : io/ktor/server/application/BaseApplicationPlugin {
 	public fun getKey ()Lio/ktor/util/AttributeKey;
 	public fun install (Lio/ktor/server/application/ApplicationCallPipeline;Lkotlin/jvm/functions/Function1;)Lorg/drewcarlson/ktor/permissions/PermissionAuthorization;
 	public synthetic fun install (Lio/ktor/util/pipeline/Pipeline;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
+public final class org/drewcarlson/ktor/permissions/PermissionAuthorizationConfig {
+	public final fun extract (Lkotlin/jvm/functions/Function1;)V
+	public final fun global (Ljava/lang/Object;)V
 }
 
 public final class org/drewcarlson/ktor/permissions/RoutePermissionApiKt {
