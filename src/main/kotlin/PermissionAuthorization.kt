@@ -15,91 +15,71 @@ private const val PRINCIPAL_PERMISSIONS_MATCHED_EXCLUDE = "Principal '%s' has ex
 private const val EXTRACT_PERMISSIONS_NOT_DEFINED =
     "Principal permission extractor must be defined, ex: `extract { (it as Session).permissions }`."
 
+
+class PermissionAuthorizationConfig internal constructor() {
+    internal var globalPermission: Any? = null
+    internal var extractPermissions: (Any) -> Set<Any> =
+        { throw NotImplementedError(EXTRACT_PERMISSIONS_NOT_DEFINED) }
+
+    /**
+     * Define the Global permission to ignore route specific
+     * permission requirements when attached to the [Principal].
+     */
+    fun <P : Any> global(permission: P) {
+        globalPermission = permission
+    }
+
+    /**
+     * Define how to extract the user's permission sent from
+     * the [Principal] instance.
+     *
+     * Note: This should be a fast value mapping function,
+     * do not read from an expensive data source.
+     */
+    fun <P : Any> extract(body: (Any) -> Set<P>) {
+        extractPermissions = body
+    }
+}
+
 class PermissionAuthorization internal constructor(
-    private val configuration: Configuration
+    internal val configuration: PermissionAuthorizationConfig
 ) {
-
-    class Configuration internal constructor() {
-        internal var globalPermission: Any? = null
-        internal var extractPermissions: (Principal) -> Set<Any> =
-            { throw NotImplementedError(EXTRACT_PERMISSIONS_NOT_DEFINED) }
-
-        /**
-         * Define the Global permission to ignore route specific
-         * permission requirements when attached to the [Principal].
-         */
-        fun <P : Any> global(permission: P) {
-            globalPermission = permission
-        }
-
-        /**
-         * Define how to extract the user's permission sent from
-         * the [Principal] instance.
-         *
-         * Note: This should be a fast value mapping function,
-         * do not read from an expensive data source.
-         */
-        fun <P : Any> extract(body: (Principal) -> Set<P>) {
-            extractPermissions = body
+    companion object Plugin :
+        BaseApplicationPlugin<ApplicationCallPipeline, PermissionAuthorizationConfig, PermissionAuthorization> {
+        override val key = AttributeKey<PermissionAuthorization>("PermissionAuthorization")
+        override fun install(
+            pipeline: ApplicationCallPipeline,
+            configure: PermissionAuthorizationConfig.() -> Unit
+        ): PermissionAuthorization {
+            return PermissionAuthorization(PermissionAuthorizationConfig().also(configure))
         }
     }
+}
 
-    fun <P : Any> interceptPipeline(
-        pipeline: ApplicationCallPipeline,
-        any: Set<P>? = null,
-        all: Set<P>? = null,
-        none: Set<P>? = null
-    ) {
-        AuthenticationChecked.install(pipeline) { call ->
-            handleInterceptedCall(call, any, all, none)
-        }
-    }
+internal sealed class RoutePermissionSets<P : Any> {
+    data class SimplePermissions<P : Any>(
+        var any: Set<P>? = null,
+        var all: Set<P>? = null,
+        var none: Set<P>? = null,
+    ) : RoutePermissionSets<P>()
 
-    fun <P : Any> interceptPipeline(
-        pipeline: ApplicationCallPipeline,
-        permissionChecks: Map<KClass<P>, Triple<P?, Verifier<P>, PermissionSelect<P>?>>,
-    ) {
-        AuthenticationChecked.install(pipeline) { call ->
-            val principal = call.authentication.principal<Principal>() ?: return@install call.respond(Forbidden)
-            val permissions = configuration.extractPermissions(principal)
-            configuration.globalPermission?.let {
-                if (permissions.contains(it)) {
-                    return@install
-                }
-            }
+    data class CustomVerifier<P : Any>(
+        val permissionChecks: MutableMap<KClass<P>, Triple<P?, Verifier<P>, PermissionSelect<P>?>> = mutableMapOf(),
+    ) : RoutePermissionSets<P>()
+}
 
-            val denyReasons = mutableListOf<String>()
-            permissionChecks.forEach { (kClass, permissionCheck) ->
-                val (stub, verify, select) = permissionCheck
-                val result = (select?.invoke(call, permissions.mapNotNull(kClass::safeCast).toSet()) ?: permissions)
-                    .mapNotNull(kClass::safeCast).toSet()
-                    .filter(verify)
-                if (result.any()) {
-                    return@install
-                } else {
-                    denyReasons += PRINCIPAL_PERMISSIONS_MISSING_ALL.format(principal, stub ?: "<no stub>")
-                }
-            }
-
-            if (denyReasons.isNotEmpty()) {
-                val message = denyReasons.joinToString(". ")
-                call.application.log.warn("Authorization failed for ${call.request.path()}. $message")
-                call.respond(Forbidden)
-            }
-        }
-    }
-
-    private suspend fun <P : Any> handleInterceptedCall(
-        call: ApplicationCall,
-        any: Set<P>?,
-        all: Set<P>?,
-        none: Set<P>?
-    ) {
-        val principal = call.authentication.principal<Principal>() ?: return call.respond(Forbidden)
+internal val SimplePermissionsRouteAuthorization = createRouteScopedPlugin(
+    name = "RoutePermissionAuthorization",
+    createConfiguration = { RoutePermissionSets.SimplePermissions<Any>() }
+) {
+    val configuration = application.plugin(PermissionAuthorization).configuration
+    on(AuthenticationChecked) { call ->
+        val (any, all, none) = pluginConfig
+        val principal = call.authentication.principal<Any>() ?: return@on call.respond(Forbidden)
         val activePermissions = configuration.extractPermissions(principal)
         configuration.globalPermission?.let {
             if (activePermissions.contains(it)) {
-                return
+                return@on
             }
         }
         val denyReasons = mutableListOf<String>()
@@ -126,15 +106,43 @@ class PermissionAuthorization internal constructor(
             call.respond(Forbidden)
         }
     }
+}
 
-    companion object Plugin :
-        BaseApplicationPlugin<ApplicationCallPipeline, Configuration, PermissionAuthorization> {
-        override val key = AttributeKey<PermissionAuthorization>("PermissionAuthorization")
-        override fun install(
-            pipeline: ApplicationCallPipeline,
-            configure: Configuration.() -> Unit
-        ): PermissionAuthorization {
-            return PermissionAuthorization(Configuration().also(configure))
+internal fun <P : Any> CustomVerifierPermissionsRouteAuthorization(
+    config: RoutePermissionSets.CustomVerifier<P>
+) = createRouteScopedPlugin(
+    name = "RoutePermissionAuthorization",
+    createConfiguration = { config }
+) {
+    val configuration = application.plugin(PermissionAuthorization).configuration
+    val permissionChecks = pluginConfig.permissionChecks
+    on(AuthenticationChecked) { call ->
+        val principal = call.authentication.principal<Any>() ?: return@on call.respond(Forbidden)
+        val permissions = configuration.extractPermissions(principal)
+        configuration.globalPermission?.let {
+            if (permissions.contains(it)) {
+                return@on
+            }
+        }
+
+        val denyReasons = mutableListOf<String>()
+        permissionChecks.forEach { (kClass, permissionCheck) ->
+            val (stub, verify, select) = permissionCheck
+            val result = (select?.invoke(call, permissions.mapNotNull(kClass::safeCast).toSet()) ?: permissions)
+                .mapNotNull(kClass::safeCast).toSet()
+                .filter { verify(it) }
+            if (result.any()) {
+                return@on
+            } else {
+                denyReasons += PRINCIPAL_PERMISSIONS_MISSING_ALL.format(principal, stub ?: "<no stub>")
+            }
+        }
+
+        if (denyReasons.isNotEmpty()) {
+            val message = denyReasons.joinToString(". ")
+            call.application.log.warn("Authorization failed for ${call.request.path()}. $message")
+            call.respond(Forbidden)
         }
     }
 }
+

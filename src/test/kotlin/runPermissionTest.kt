@@ -78,14 +78,14 @@ fun runPermissionTest(
 
         routing {
             post("/token") {
-                val permissions = call.receiveOrNull<List<Permission>>()?.toSet()
+                val permissions = call.receiveNullable<List<Permission>>()?.toSet()
                 call.sessions.getOrSet {
                     UserSession("test", permissions ?: emptySet())
                 }
                 call.respond(HttpStatusCode.OK)
             }
             authenticate {
-                val perms = Permission.values().toList()
+                val perms = Permission.entries
                 perms.forEach { permission ->
                     withPermission(permission) {
                         get("/${permission.name}") {

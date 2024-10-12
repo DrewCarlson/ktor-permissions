@@ -1,9 +1,9 @@
 [versions]
 kotlin = { strictly = "2.0.0" }
 dokka = "1.9.20"
-coroutines = "1.8.1"
-serialization = "1.7.1"
-ktorio = "2.3.12"
+coroutines = "1.9.0"
+serialization = "1.7.3"
+ktorio = "3.0.0"
 kover = "0.8.2"
 binary_compat = "0.16.2"
 
@@ -46,7 +46,7 @@ ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "kto
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktorio" }
 ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktorio" }
 ktor-server-sessions = { module = "io.ktor:ktor-server-sessions", version.ref = "ktorio" }
-ktor-server-tests = { module = "io.ktor:ktor-server-tests", version.ref = "ktorio" }
+ktor-server-tests = { module = "io.ktor:ktor-server-test-host", version.ref = "ktorio" }
 ktor-server-contentNegotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktorio" }
 ktor-server-autoHeadResponse = { module = "io.ktor:ktor-server-auto-head-response", version.ref = "ktorio" }
 ktor-server-cors = { module = "io.ktor:ktor-server-cors", version.ref = "ktorio" }

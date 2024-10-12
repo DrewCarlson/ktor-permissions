@@ -1,6 +1,5 @@
 package org.drewcarlson.ktor.permissions
 
-import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import kotlin.reflect.KClass
 
@@ -51,9 +50,14 @@ fun <P : Any> Route.withPermission(
     val permissions = WithPermissionGroup<P>().apply(builder).permissions.toMap()
     val description = "anyOf (${permissions.mapNotNull { (_, v) -> v.first?.toString() }.joinToString()})"
     return createChild(AuthorizedRouteSelector(description)).also { route ->
-        @Suppress("UNCHECKED_CAST")
-        application.plugin(PermissionAuthorization)
-            .interceptPipeline(route, permissions as Map<KClass<P>, Triple<P?, Verifier<P>, PermissionSelect<P>?>>)
+        route.install(
+            CustomVerifierPermissionsRouteAuthorization(
+                @Suppress("UNCHECKED_CAST")
+                RoutePermissionSets.CustomVerifier(
+                    permissions as MutableMap<KClass<P>, Triple<P?, Verifier<P>, PermissionSelect<P>?>>
+                )
+            )
+        )
         route.buildRoute()
     }
 }
@@ -70,8 +74,11 @@ private fun <P : Any> Route.authorizedRoute(
         none?.let { "noneOf (${none.joinToString(" ")})" }
     ).joinToString(",")
     return createChild(AuthorizedRouteSelector(description)).also { route ->
-        application.plugin(PermissionAuthorization)
-            .interceptPipeline(route, any, all, none)
+        route.install(SimplePermissionsRouteAuthorization) {
+            this.any = any
+            this.all = all
+            this.none = none
+        }
         route.build()
     }
 }
