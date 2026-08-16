@@ -7,7 +7,7 @@ ktorio = "3.0.0"
 kover = "0.8.2"
 binary_compat = "0.16.2"
 
-okhttp = "5.0.0-alpha.14"
+okhttp = "5.5.0"
 
 spotless = "6.25.0"
 ktlint = "0.46.1"
